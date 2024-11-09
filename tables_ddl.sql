@@ -1,13 +1,17 @@
 -- Enable UUID extension for customer and cart IDs if needed
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-DROP TABLE public.customers;
--- Customers Table
-CREATE TABLE public.customers (
+
+CREATE TABLE customers (
   customer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(100) NOT NULL,
+  cognito_sub VARCHAR(100) UNIQUE, -- Unique identifier from Cognito
   email VARCHAR(100) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+  name VARCHAR(100),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Index on `cognito_sub` for faster lookups
+CREATE INDEX idx_cognito_sub ON customers (cognito_sub);
 
 DROP TABLE public.carts;
 -- Carts Table
