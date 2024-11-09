@@ -37,3 +37,19 @@ CREATE TABLE public.cart_items (
   added_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE public.inventory (
+  inventory_id SERIAL PRIMARY KEY,
+  product_id INT REFERENCES products(product_id),
+  location VARCHAR(100) DEFAULT 'default', -- Supports multi-location inventory
+  quantity INT DEFAULT 0,
+  last_updated TIMESTAMP DEFAULT NOW()
+);
+
+-- Optional: Inventory Log Table for Tracking Changes
+CREATE TABLE public.inventory_log (
+  log_id SERIAL PRIMARY KEY,
+  product_id INT REFERENCES products(product_id),
+  change_amount INT NOT NULL,
+  change_type VARCHAR(50), -- e.g., 'SALE', 'RETURN', 'STOCK_ADJUSTMENT'
+  created_at TIMESTAMP DEFAULT NOW()
+);
