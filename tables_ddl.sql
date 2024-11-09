@@ -1,23 +1,39 @@
-CREATE TABLE carts (
-    cart_id SERIAL PRIMARY KEY,          -- Unique cart ID (auto-incremented)
-    customer_id INT REFERENCES "FoodAppDB".public.customers(id), -- Optional reference to logged-in user (if applicable)
-    cart_status VARCHAR(50) NOT NULL DEFAULT 'active', -- Status of the cart (e.g., active, completed, abandoned)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    -- Time when the cart was created
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP     -- Time when the cart was last updated
+-- Enable UUID extension for customer and cart IDs if needed
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+DROP TABLE public.customers;
+-- Customers Table
+CREATE TABLE public.customers (
+  customer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE products (
-    product_id SERIAL PRIMARY KEY,
-    product_name VARCHAR(255) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,   -- Example price field
-    description TEXT,                -- Optional product description
-    stock_quantity INT NOT NULL      -- Quantity available in stock
+DROP TABLE public.carts;
+-- Carts Table
+CREATE TABLE public.carts (
+  cart_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  customer_id UUID REFERENCES customers(customer_id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  status VARCHAR(50) DEFAULT 'active'
 );
 
-CREATE TABLE cart_items (
-    cart_item_id SERIAL PRIMARY KEY, 
-    cart_id INT REFERENCES carts(cart_id) ON DELETE CASCADE,   -- Foreign key to carts
-    product_id INT REFERENCES products(product_id) ON DELETE CASCADE, -- Foreign key to products
-    quantity INT NOT NULL DEFAULT 1,                           -- Quantity of the product in the cart
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                -- Timestamp of when the item was added
+DROP TABLE public.products;
+-- Products Table (Using SERIAL for product_id)
+CREATE TABLE public.products (
+  product_id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
 );
+DROP TABLE public.cart_items;
+-- Cart Items Table (Using SERIAL for item_id)
+CREATE TABLE public.cart_items (
+  item_id SERIAL PRIMARY KEY,
+  cart_id UUID REFERENCES carts(cart_id),
+  product_id INT REFERENCES products(product_id),
+  quantity INT DEFAULT 1,
+  added_at TIMESTAMP DEFAULT NOW()
+);
+
