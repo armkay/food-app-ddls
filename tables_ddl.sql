@@ -25,12 +25,16 @@ CREATE TABLE public.carts (
 DROP TABLE public.products;
 -- Products Table (Using SERIAL for product_id)
 CREATE TABLE public.products (
-  product_id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  price DECIMAL(10, 2) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+	product_id serial4 NOT NULL,
+	"name" varchar(100) NOT NULL,
+	description text NULL,
+	price numeric(10, 2) NOT NULL,
+	created_at timestamp DEFAULT now() NULL,
+	is_on_sale bool DEFAULT false NULL,
+	sale_price numeric(10, 2) NULL,
+	CONSTRAINT products_pkey PRIMARY KEY (product_id)
 );
+
 DROP TABLE public.cart_items;
 -- Cart Items Table (Using SERIAL for item_id)
 CREATE TABLE public.cart_items (
@@ -40,6 +44,8 @@ CREATE TABLE public.cart_items (
   quantity INT DEFAULT 1,
   added_at TIMESTAMP DEFAULT NOW()
 );
+
+DROP TABLE public.inventory 
 
 CREATE TABLE public.inventory (
   inventory_id SERIAL PRIMARY KEY,
@@ -57,3 +63,39 @@ CREATE TABLE public.inventory_log (
   change_type VARCHAR(50), -- e.g., 'SALE', 'RETURN', 'STOCK_ADJUSTMENT'
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE public.categories (
+  category_id serial PRIMARY KEY,
+  name varchar(100) NOT NULL,
+  parent_category_id int REFERENCES categories(category_id) -- for nested categories
+);
+
+CREATE TABLE public.product_categories (
+  product_id int REFERENCES products(product_id),
+  category_id int REFERENCES categories(category_id),
+  PRIMARY KEY (product_id, category_id)
+);
+
+CREATE TABLE public.product_variations (
+  variation_id serial PRIMARY KEY,
+  product_id int REFERENCES products(product_id),
+  sku varchar(50) UNIQUE, -- optional
+  color varchar(50),
+  size varchar(50),
+  price numeric(10,2), -- override if needed
+  stock_quantity int DEFAULT 0,
+  image_url text
+);
+
+
+CREATE TABLE public.tags (
+  tag_id serial PRIMARY KEY,
+  name varchar(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE public.product_tags (
+  product_id int REFERENCES products(product_id),
+  tag_id int REFERENCES tags(tag_id),
+  PRIMARY KEY (product_id, tag_id)
+);
+
