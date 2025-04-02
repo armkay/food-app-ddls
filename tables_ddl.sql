@@ -99,3 +99,17 @@ CREATE TABLE public.product_tags (
   PRIMARY KEY (product_id, tag_id)
 );
 
+-- Tenant Table
+CREATE TABLE tenants (
+  tenant_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(100) UNIQUE NOT NULL,
+  domain VARCHAR(100), -- Optional custom domain
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+tenant_id UUID NOT NULL REFERENCES tenants(tenant_id)
+
+CREATE INDEX idx_products_tenant ON products (tenant_id);
+
+
